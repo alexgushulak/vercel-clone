@@ -5,7 +5,7 @@ export default function Car() {
     const { id } = router.query
 
     return (
-        <div className="p"></div>
+        <div className="p">{id}</div>
     )
 
 }

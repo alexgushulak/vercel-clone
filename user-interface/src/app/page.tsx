@@ -1,17 +1,24 @@
 'use client'
 import { useState } from "react";
 
-function handleDeplyoment(githubUrl: string, setDeploymentState: React.Dispatch<React.SetStateAction<IDeploymentState>>) {
+async function handleDeplyoment(githubUrl: string, setDeploymentState: React.Dispatch<React.SetStateAction<IDeploymentState>>) {
   // regex for a url such as https://www.github.com/alexgushulak/vercel-clone.git
   const urlRegex = new RegExp(
     '[A-Za-z]+://([A-Za-z]+(\.[A-Za-z]+)+)/[A-Za-z0-9]+/[A-Za-z0-9]+\.[A-Za-z]+'
   )
-
-  if (urlRegex.test(githubUrl)) {
-    setDeploymentState({state: 'uploading'})
-  }
-
-  // POST to {deployserver_address}/api/deploy
+  // fetch data from localhost:3001/deploy API and extract data from body
+  fetch('http://localhost:3001/deploy', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({repoUrl: githubUrl})
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log(data.status)
+    setDeploymentState({state: data.status})
+  })
 }
 
 type stateStrings = 'none' | 'uploading' | 'upload failed' | 'upload complete' | 'building' | 'build failed' | 'build complete' |'deploying'| 'deploy failed' | 'deploy complete'
@@ -48,7 +55,7 @@ export default function Home() {
           <p 
             className="my-2 text-center"
           >
-            {deploymentState.state}
+            Satus: {deploymentState.state}
           </p>
         </div>
       </div>
