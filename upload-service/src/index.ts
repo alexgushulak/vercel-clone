@@ -2,6 +2,11 @@ import express from "express"
 import cors from "cors"
 import { createClient } from "redis"
 import { v4 as uuidv4 } from "uuid"
+import 'dotenv/config';
+// import simpleGit from "simple-git"
+import { S3 } from "aws-sdk"
+// import fs from "fs"
+// import path from "path"
 
 
 
@@ -9,8 +14,15 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+const redisUrl: string | undefined = process.env.REDIS_URL
+
+if (!redisUrl) {
+    console.error("Redis URL not found")
+    process.exit(1)
+}
+
 const client = createClient({
-    url: "redis://default:Nph3H6dHH5JJae1D1B24CL5M6abmjLdp@monorail.proxy.rlwy.net:24898"
+    url: redisUrl
 })
 
 client.connect()
@@ -20,7 +32,28 @@ client.on("error", (error) => {
 })
 
 client.on("connect", () => {
-    console.info("Connected to Redis")
+    console.info("Redis Connected ✅")
+})
+
+const accessKeyId: string | undefined = process.env.AWS_ACCESS_KEY_ID
+const secretAccessKey: string | undefined = process.env.AWS_SECRET_ACCESS_KEY
+
+if (!accessKeyId || !secretAccessKey) {
+    console.error("AWS credentials not found")
+    process.exit(1)
+}
+
+const s3 = new S3({
+    accessKeyId: accessKeyId,
+    secretAccessKey: secretAccessKey
+})
+
+s3.listBuckets((err) => {
+    if (err) {
+        console.error("Error", err)
+    } else {
+        console.info("S3 Connected ✅")
+    }
 })
 
 
@@ -29,10 +62,11 @@ client.on("connect", () => {
 app.post("/deploy", async (req, res) => {
     const repoUrl: string = req.body.repoUrl
     const id: string = uuidv4()
-    // upload files locally
-    // push files to s3
+    // donwload files locally w/ simple-git
+    // upload files to s3
     // delete local files
-    // profit
+    // update queue once finished
+    // the status should be stored somewhere but I don't know where yet
     client.lPush("deploy-queue", id).then(() => {
         console.log(`Upload request for ${repoUrl} with id ${id} queued`)
     }).then(() => {
@@ -51,5 +85,5 @@ app.get("/status", async (req) => {
     // const response =
 })
 
-console.info("Application Running")
+console.info("Application Running ✅")
 app.listen(3001);
