@@ -66,8 +66,9 @@ app.post("/deploy", async (req, res) => {
     const projectDirectory = path.join(__dirname, "..", outputFolder, id)
     const git = simpleGit()
     await git.clone(repoUrl, projectDirectory)
-    const allFiles: string[] = getAllFiles(projectDirectory)
+    const allFiles: string[] = await getAllFiles(projectDirectory)
     console.log(allFiles)
+    client.hSet(id, "status", "uploaded") // important
     // upload files to s3
     // delete local files
     // update queue once finished
@@ -83,11 +84,15 @@ app.post("/deploy", async (req, res) => {
     })
 })
 
-app.get("/status", async (req) => {
-    const id: string = req.query['id'] as string
+app.get("/status", async (req, res) => {
+    const id: string = req.query.id as string
     console.log(id)
-    // get status from redis database
-    // const response =
+    client.hGet(id, "status").then((status: string | undefined) => {
+        res.send({
+            id: id,
+            status: status
+        })
+    })
 })
 
 console.info("Application Running ✅")
