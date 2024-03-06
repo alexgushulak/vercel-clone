@@ -3,10 +3,10 @@ import cors from "cors"
 import { createClient } from "redis"
 import { v4 as uuidv4 } from "uuid"
 import 'dotenv/config';
-// import simpleGit from "simple-git"
+import simpleGit from "simple-git"
 import { S3 } from "aws-sdk"
-// import fs from "fs"
-// import path from "path"
+import { getAllFiles } from "./utils";
+import path from "path"
 
 
 
@@ -62,7 +62,12 @@ s3.listBuckets((err) => {
 app.post("/deploy", async (req, res) => {
     const repoUrl: string = req.body.repoUrl
     const id: string = uuidv4()
-    // donwload files locally w/ simple-git
+    const outputFolder = "output"
+    const projectDirectory = path.join(__dirname, "..", outputFolder, id)
+    const git = simpleGit()
+    await git.clone(repoUrl, projectDirectory)
+    const allFiles: string[] = getAllFiles(projectDirectory)
+    console.log(allFiles)
     // upload files to s3
     // delete local files
     // update queue once finished
