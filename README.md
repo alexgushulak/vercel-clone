@@ -13,14 +13,14 @@ The User Interface (UI) component serves as the front-end of the Vercel Clone pl
 - Initiating the deployment process by sending the repository information to the appropriate backend services.
 - Tracking and displaying the deployment status to users in real-time. ✅
 
-2. **Upload Service (upload-service)**
+2. **Upload Service (upload-service)** ✅
 
 The Upload Service is a crucial backend component that handles the uploading of GitHub repositories to an Amazon S3 bucket. Its primary responsibilities include:
 
 - Receiving the repository information from the User Interface. ✅
 - Cloning the specified GitHub repository to a temporary directory. ✅
-- Uploading the GitHub repository to an Amazon S3 bucket for storage.
-- Updating the Redis queue and logging system with the relevant deployment status.
+- Uploading the GitHub repository to an Amazon S3 bucket for storage. ✅
+- Updating the Redis queue and logging system with the relevant deployment status. ✅
 
 3. **Deploy Service (deploy-service)**
 
