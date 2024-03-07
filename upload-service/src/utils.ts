@@ -15,3 +15,14 @@ export const getAllFiles = (folderPath: string) => {
     })
     return response;
 }
+
+//function to upload all files recursively to an s3 bucket
+export const uploadFile = async (s3: AWS.S3, fileName: string, localFilePath: string) => {
+    const fileContent = fs.readFileSync(localFilePath);
+    const response = await s3.upload({
+        Body: fileContent,
+        Key: fileName,
+        Bucket: "vercel-repository-bucket-dev"
+    }).promise();
+    console.log(`File uploaded successfully. ${response.Location}`)
+}

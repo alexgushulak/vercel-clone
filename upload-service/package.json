@@ -7,6 +7,9 @@
     "test": "jest",
     "dev": "npx nodemon ./src/server.ts"
   },
+  "nodemonConfig": {
+    "ignore": ["output/*"]
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

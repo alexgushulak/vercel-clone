@@ -5,11 +5,12 @@ import { v4 as uuidv4 } from "uuid"
 import 'dotenv/config';
 import simpleGit from "simple-git"
 import { S3 } from "aws-sdk"
-import { getAllFiles } from "./utils";
+import { getAllFiles, uploadFile } from "./utils";
 import path from "path"
+import fs from "fs"
 
 
-
+const git = simpleGit()
 const app = express()
 app.use(cors())
 app.use(express.json())
@@ -48,14 +49,13 @@ const s3 = new S3({
     secretAccessKey: secretAccessKey
 })
 
-s3.listBuckets((err) => {
+s3.listBuckets((err, data) => {
     if (err) {
-        console.error("Error", err)
+        console.error("Error fetching buckets", err)
     } else {
-        console.info("S3 Connected ✅")
+        console.log("Buckets", data)
     }
 })
-
 
 
 
@@ -64,22 +64,35 @@ app.post("/deploy", async (req, res) => {
     const id: string = uuidv4()
     const outputFolder = "output"
     const projectDirectory = path.join(__dirname, "..", outputFolder, id)
-    const git = simpleGit()
     await git.clone(repoUrl, projectDirectory)
-    const allFiles: string[] = await getAllFiles(projectDirectory)
+    const allFiles: string[] = getAllFiles(projectDirectory)
     console.log(allFiles)
-    client.hSet(id, "status", "uploaded") // important
+    client.hSet(id, "status", "uploading")
     // upload files to s3
-    // delete local files
-    // update queue once finished
-    // the status should be stored somewhere but I don't know where yet
-    client.lPush("deploy-queue", id).then(() => {
+    allFiles.forEach(async file => {
+        await uploadFile(s3, file.slice(__dirname.length + 1), file)
+    })
+
+    client.hSet(id, "status", "uploaded")
+    setTimeout(() => {
+        console.log("Deleting files")
+        fs.rm(projectDirectory, { recursive: true }, (err) => {
+            if (err) {
+                console.error("Error deleting files", err)
+            } else {
+                console.info("Files deleted ✅")
+            }
+        })
+    }, 5000)
+    client.lPush("deploy-queue", id)
+    .then(() => {
         console.log(`Upload request for ${repoUrl} with id ${id} queued`)
     }).then(() => {
-        res.send({
-            id: id,
-            repoUrl: repoUrl,
-            status: 'uploaded'
+        client.hGet(id, "status").then((status: string | undefined) => {
+            res.send({
+                id: id,
+                status: status
+            })
         })
     })
 })
