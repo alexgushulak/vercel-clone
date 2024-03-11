@@ -26,19 +26,19 @@ The Upload Service is a crucial backend component that handles the uploading of 
 
 The Deploy Service is responsible for building and deploying the uploaded GitHub repository. It leverages an Amazon EC2 instance running a pre-configured deployment container. The key functions of the Deploy Service are:
 
-- Monitoring the Redis queue for new deployment requests.
-- Retrieving the GitHub repository files from the Amazon S3 bucket.
-- Extracting and building the repository using npm or any other specified build tools.
+- Monitoring the Redis queue for new deployment requests. ✅
+- Retrieving the GitHub repository files from the Amazon S3 bucket. ✅
+- Extracting and building the repository using npm or any other specified build tools. ✅
 - Sending real-time status updates to the User Interface and logging system during the deployment process.
-- Uploading the built artifacts to a content delivery network (CDN) or another storage location for serving.
+- Uploading the built artifacts to a content delivery network (CDN) or another storage location for serving. ✅
 
 4. **Request Service (request-service)**
 
 The Request Service is a Node.js TypeScript project that handles incoming requests for accessing the deployed websites. Its primary responsibilities include:
 
-- Extracting the subdomain from the incoming request URL.
-- Using the subdomain as an identifier to retrieve the corresponding website files from the storage location (e.g., Amazon S3 or CDN).
-- Serving the requested website files to the client.
+- Extracting the subdomain from the incoming request URL. ✅
+- Using the subdomain as an identifier to retrieve the corresponding website files from the storage location (e.g., Amazon S3 or CDN). ✅
+- Serving the requested website files to the client. ✅
 
 ## Infrastructure
 
