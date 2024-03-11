@@ -22,7 +22,7 @@ export const uploadFile = async (s3: AWS.S3, fileName: string, localFilePath: st
     const response = await s3.upload({
         Body: fileContent,
         Key: fileName,
-        Bucket: "vercel-repository-bucket-dev"
+        Bucket: 'vercel-repository-bucket-dev'
     }).promise();
     console.log(`File uploaded successfully. ${response.Location}`)
 }

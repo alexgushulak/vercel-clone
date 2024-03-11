@@ -70,30 +70,23 @@ app.post("/deploy", async (req, res) => {
     client.hSet(id, "status", "uploading")
     // upload files to s3
     allFiles.forEach(async file => {
-        await uploadFile(s3, file.slice(__dirname.length + 1), file)
+        await uploadFile(s3, file.slice(__dirname.length + 4), file)
     })
 
+    await new Promise(resolve => setTimeout(resolve, 5000))
     client.hSet(id, "status", "uploaded")
-    setTimeout(() => {
-        console.log("Deleting files")
-        fs.rm(projectDirectory, { recursive: true }, (err) => {
-            if (err) {
-                console.error("Error deleting files", err)
-            } else {
-                console.info("Files deleted ✅")
-            }
-        })
-    }, 5000)
+    fs.rm(projectDirectory, { recursive: true }, (err) => {
+        if (err) {
+            console.error("Error deleting files", err)
+        } else {
+            console.info("Files deleted ✅")
+        }
+    })
     client.lPush("deploy-queue", id)
-    .then(() => {
-        console.log(`Upload request for ${repoUrl} with id ${id} queued`)
-    }).then(() => {
-        client.hGet(id, "status").then((status: string | undefined) => {
-            res.send({
-                id: id,
-                status: status
-            })
-        })
+
+    res.send({
+        id: id,
+        status: "uploaded"
     })
 })
 
